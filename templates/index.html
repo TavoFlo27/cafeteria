@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cafetería Delicia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>☕ Cafetería</h1>
+    </header>
+
+    <div class="buscador-container">
+        <form action="/buscar" method="get">
+            <input type="text" name="q" placeholder="Buscar productos..." value="{{ busqueda if busqueda else '' }}">
+            <button type="submit">🔍</button>
+        </form>
+    </div>
+
+    <div class="contenedor-principal">
+        <aside class="columna-categorias">
+            <h2>Categorías</h2>
+            <ul class="categorias-list">
+                <li class="categoria-activa">Bebidas</li>
+                <li>Repostería</li>
+                <li>Sándwiches</li>
+            </ul>
+        </aside>
+
+        <main class="columna-productos">
+            <h2>Productos Populares</h2>
+            <div class="productos-grid">
+                <div class="producto-columna">
+                    <div class="producto-card">
+                        <h3>Macchiato</h3>
+                        <div class="precios">
+                            <span>Chico: MX$30</span>
+                            <span>Grande: MX$45</span>
+                        </div>
+                        <button class="btn-agregar" data-id="1" data-nombre="Macchiato" data-precio="30" data-precio_grande="45">Agregar</button>
+                    </div>
+
+                    <div class="producto-card">
+                        <h3>Espresso</h3>
+                        <div class="precios">
+                            <span>Chico: MX$20</span>
+                            <span>Grande: MX$35</span>
+                        </div>
+                        <button class="btn-agregar" data-id="2" data-nombre="Espresso" data-precio="20" data-precio_grande="35">Agregar</button>
+                    </div>
+
+                    <div class="producto-card">
+                        <h3>Flan de fresa</h3>
+                        <div class="precios">
+                            <span>Chico: MX$30</span>
+                            <span>Grande: MX$45</span>
+                        </div>
+                        <button class="btn-agregar" data-id="4" data-nombre="Flan de fresa" data-precio="30" data-precio_grande="45">Agregar</button>
+                    </div>
+                </div>
+
+                <div class="producto-columna">
+                    <div class="producto-card">
+                        <h3>Capcucke</h3>
+                        <div class="precios">
+                            <span>Chico: MX$25</span>
+                            <span>Grande: MX$30</span>
+                        </div>
+                        <button class="btn-agregar" data-id="5" data-nombre="Capcucke" data-precio="25" data-precio_grande="30">Agregar</button>
+                    </div>
+
+                    <div class="producto-card">
+                        <h3>Mocca</h3>
+                        <div class="precios">
+                            <span>Chico: MX$50</span>
+                            <span>Grande: MX$70</span>
+                        </div>
+                        <button class="btn-agregar" data-id="3" data-nombre="Mocca" data-precio="50" data-precio_grande="70">Agregar</button>
+                    </div>
+
+                    <div class="producto-card">
+                        <h3>Sandwich</h3>
+                        <div class="precios">
+                            <span>Chico: MX$30</span>
+                            <span>Grande: MX$50</span>
+                        </div>
+                        <button class="btn-agregar" data-id="6" data-nombre="Sandwich" data-precio="30" data-precio_grande="50">Agregar</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Carrito flotante -->
+    <div id="carrito-globo" class="carrito-globo">
+        <div class="carrito-contenido">
+            <h3>🛒 Tu Pedido</h3>
+            <ul id="lista-carrito"></ul>
+            <div class="carrito-total">Total: <span id="total-carrito">MX$0</span></div>
+            
+            <div class="personalizacion">
+                <h4>Personalizaciones:</h4>
+                <div id="personalizaciones-container"></div>
+            </div>
+            
+            <div class="opciones-pago">
+                <h4>Método de pago:</h4>
+                <label><input type="radio" name="metodo_pago" value="efectivo" checked> Pagar en caja</label>
+                <label><input type="radio" name="metodo_pago" value="online"> Pagar ahora</label>
+            </div>
+            
+            <form id="form-pedido" action="/crear_pedido" method="post">
+                <input type="hidden" name="cliente" value="Cliente Móvil">
+                <input type="hidden" name="productos" id="productos-ids" value="">
+                <input type="hidden" name="personalizaciones" id="personalizaciones-data" value="">
+                <button type="submit" class="btn-pagar">Confirmar Pedido</button>
+            </form>
+        </div>
+        <div class="carrito-icono">
+            🛒 <span id="contador-carrito">0</span>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

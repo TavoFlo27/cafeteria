@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cajero - Cafetería</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .contenedor-cajero {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        .columna-productos, .columna-pago {
+            flex: 1;
+        }
+        .pedido-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .pago-select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border: 2px solid var(--secondary);
+            border-radius: 5px;
+        }
+        .btn-actualizar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .estado-pagado { color: green; font-weight: bold; }
+        .estado-pendiente { color: orange; font-weight: bold; }
+        .productos-lista {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>💵 Cajero</h1>
+    </header>
+
+    <div class="contenedor-cajero">
+        <div class="columna-productos">
+            <h2>Pedidos Recientes</h2>
+            {% for pedido in pedidos %}
+            <div class="pedido-card">
+                <h3>Pedido #{{ pedido.id }}</h3>
+                <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+                <p><strong>Productos:</strong></p>
+                <ul class="productos-lista">
+                    {% for producto in pedido.productos.split('|')[0].split(',') %}
+                    <li>{{ producto.strip() }}</li>
+                    {% endfor %}
+                </ul>
+                {% if '|' in pedido.productos %}
+                <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
+                {% endif %}
+                <p><strong>Total:</strong> ${{ pedido.total }}</p>
+                <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%H:%M') }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="columna-pago">
+            <h2>Estado de Pago</h2>
+            {% for pedido in pedidos %}
+            <div class="pedido-card">
+                <h3>Pedido #{{ pedido.id }}</h3>
+                <p class="estado-{{ pedido.pago }}">Pago: {{ pedido.pago | upper }}</p>
+                <form action="/actualizar_pago/{{ pedido.id }}" method="post">
+                    <select name="pago" class="pago-select">
+                        <option value="pendiente" {% if pedido.pago == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="pagado" {% if pedido.pago == 'pagado' %}selected{% endif %}>Pagado</option>
+                    </select>
+                    <button type="submit" class="btn-actualizar">Actualizar Pago</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        // Actualizar cada 30 segundos
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

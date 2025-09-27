@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seguimiento - Cafetería</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .pedido-info {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem auto;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .estado-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .estado-pendiente { background: #FFF3CD; color: #856404; }
+        .estado-en-preparación { background: #CCE5FF; color: #004085; }
+        .estado-listo { background: #D4EDDA; color: #155724; }
+        .btn-volver {
+            display: block;
+            text-align: center;
+            margin: 1rem auto;
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            max-width: 200px;
+        }
+        .productos-lista {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+        .tiempo-preparacion {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #e6f7ff;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔍 Seguimiento de Pedido</h1>
+    </header>
+
+    <main>
+        <div class="pedido-info">
+            <h2>Pedido #{{ pedido.id }}</h2>
+            <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+            <p><strong>Productos:</strong></p>
+            <ul class="productos-lista">
+                {% for producto in pedido.productos.split('|')[0].split(',') %}
+                <li>{{ producto.strip() }}</li>
+                {% endfor %}
+            </ul>
+            {% if '|' in pedido.productos %}
+            <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
+            {% endif %}
+            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+            <p><strong>Estado de pago:</strong> {{ pedido.pago | upper }}</p>
+            
+            <div class="estado-container estado-{{ pedido.estado | replace(' ', '-') }}">
+                Estado actual: {{ pedido.estado | upper }}
+            </div>
+            
+            {% if pedido.pago == 'pagado' and pedido.hora_preparacion %}
+            <div class="tiempo-preparacion">
+                {% if datetime.now() < pedido.hora_preparacion %}
+                <p>Tiempo estimado: {{ ((pedido.hora_preparacion - datetime.now()).seconds // 60) + 1 }} minutos</p>
+                {% else %}
+                <p>¡Tu pedido está listo para recoger!</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <a href="/" class="btn-volver">Volver al Menú</a>
+    </main>
+
+    <script>
+        // Actualización automática cada 30 segundos
+        setTimeout(() => {
+            window.location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

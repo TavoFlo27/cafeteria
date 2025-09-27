@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barista - Cafetería</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .pedido-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .estado-select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border: 2px solid var(--secondary);
+            border-radius: 5px;
+        }
+        .btn-actualizar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .tiempo-preparacion {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #e6f7ff;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .estado-pendiente { background: #FFF3CD; color: #856404; }
+        .estado-en-preparación { background: #CCE5FF; color: #004085; }
+        .estado-listo { background: #D4EDDA; color: #155724; }
+        .productos-lista {
+            margin: 0.5rem 0;
+            padding-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>👨‍🍳 Barista</h1>
+    </header>
+
+    <main class="container">
+        <h2>Pedidos Pagados</h2>
+        
+        {% if not pedidos %}
+            <p class="sin-pedidos">No hay pedidos pendientes.</p>
+        {% endif %}
+
+        {% for pedido in pedidos %}
+        <div class="pedido-card">
+            <h3>Pedido #{{ pedido.id }}</h3>
+            <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+            <p><strong>Productos:</strong></p>
+            <ul class="productos-lista">
+                {% for producto in pedido.productos.split('|')[0].split(',') %}
+                <li>{{ producto.strip() }}</li>
+                {% endfor %}
+            </ul>
+            {% if '|' in pedido.productos %}
+            <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
+            {% endif %}
+            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Estado actual:</strong> <span class="estado-{{ pedido.estado | replace(' ', '-') }}">{{ pedido.estado }}</span></p>
+            
+            {% if pedido.pago == 'pagado' %}
+            <div class="tiempo-preparacion">
+                {% if ahora < pedido.hora_preparacion %}
+                <p>Tiempo restante: {{ ((pedido.hora_preparacion - ahora).seconds // 60) + 1 }} minutos</p>
+                {% else %}
+                <p>¡Pedido listo para servir!</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <form action="/actualizar_estado/{{ pedido.id }}" method="post">
+                <select name="estado" class="estado-select">
+                    <option value="en preparación" {% if pedido.estado == 'en preparación' %}selected{% endif %}>En preparación</option>
+                    <option value="listo" {% if pedido.estado == 'listo' %}selected{% endif %}>Listo</option>
+                    <option value="terminado" {% if pedido.estado == 'terminado' %}selected{% endif %}>Terminado</option>
+                </select>
+                <button type="submit" class="btn-actualizar">Actualizar Estado</button>
+            </form>
+        </div>
+        {% endfor %}
+    </main>
+
+    <script>
+        // Actualizar cada 60 segundos
+        setTimeout(() => {
+            window.location.reload();
+        }, 60000);
+    </script>
+</body>
+</html>
