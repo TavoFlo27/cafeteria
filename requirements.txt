@@ -1,0 +1,5 @@
+Flask
+Mako
+Flask-SQLAlchemy
+Flask-Migrate
+gunicorn
