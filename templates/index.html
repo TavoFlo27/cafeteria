@@ -12,7 +12,7 @@
     </header>
 
     <div class="buscador-container">
-        <form action="/buscar" method="get">
+        <form action="{{ url_for('buscar') }}" method="get">
             <input type="text" name="q" placeholder="Buscar productos..." value="{{ busqueda if busqueda else '' }}">
             <button type="submit">🔍</button>
         </form>
@@ -29,70 +29,58 @@
         </aside>
 
         <main class="columna-productos">
-            <h2>Productos Populares</h2>
+            <h2>{{ 'Resultados de Búsqueda' if busqueda else 'Productos Populares' }}</h2>
+            
             <div class="productos-grid">
                 <div class="producto-columna">
+                    {% for producto in productos[:(productos|length // 2) + (productos|length % 2)] %}
                     <div class="producto-card">
-                        <h3>Macchiato</h3>
+                        <h3>{{ producto.nombre }}</h3>
                         <div class="precios">
-                            <span>Chico: MX$30</span>
-                            <span>Grande: MX$45</span>
+                            <span>Chico: MX${{ producto.precio }}</span>
+                            {% if producto.precio_grande %}
+                            <span>Grande: MX${{ producto.precio_grande }}</span>
+                            {% endif %}
                         </div>
-                        <button class="btn-agregar" data-id="1" data-nombre="Macchiato" data-precio="30" data-precio_grande="45">Agregar</button>
+                        <button class="btn-agregar" 
+                                data-id="{{ producto.id }}" 
+                                data-nombre="{{ producto.nombre }}" 
+                                data-precio="{{ producto.precio }}" 
+                                data-precio_grande="{{ producto.precio_grande or producto.precio }}">
+                            Agregar
+                        </button>
                     </div>
-
-                    <div class="producto-card">
-                        <h3>Espresso</h3>
-                        <div class="precios">
-                            <span>Chico: MX$20</span>
-                            <span>Grande: MX$35</span>
-                        </div>
-                        <button class="btn-agregar" data-id="2" data-nombre="Espresso" data-precio="20" data-precio_grande="35">Agregar</button>
-                    </div>
-
-                    <div class="producto-card">
-                        <h3>Flan de fresa</h3>
-                        <div class="precios">
-                            <span>Chico: MX$30</span>
-                            <span>Grande: MX$45</span>
-                        </div>
-                        <button class="btn-agregar" data-id="4" data-nombre="Flan de fresa" data-precio="30" data-precio_grande="45">Agregar</button>
-                    </div>
+                    {% endfor %}
                 </div>
-
+                
                 <div class="producto-columna">
+                    {% for producto in productos[(productos|length // 2) + (productos|length % 2):] %}
                     <div class="producto-card">
-                        <h3>Capcucke</h3>
+                        <h3>{{ producto.nombre }}</h3>
                         <div class="precios">
-                            <span>Chico: MX$25</span>
-                            <span>Grande: MX$30</span>
+                            <span>Chico: MX${{ producto.precio }}</span>
+                            {% if producto.precio_grande %}
+                            <span>Grande: MX${{ producto.precio_grande }}</span>
+                            {% endif %}
                         </div>
-                        <button class="btn-agregar" data-id="5" data-nombre="Capcucke" data-precio="25" data-precio_grande="30">Agregar</button>
+                        <button class="btn-agregar" 
+                                data-id="{{ producto.id }}" 
+                                data-nombre="{{ producto.nombre }}" 
+                                data-precio="{{ producto.precio }}" 
+                                data-precio_grande="{{ producto.precio_grande or producto.precio }}">
+                            Agregar
+                        </button>
                     </div>
-
-                    <div class="producto-card">
-                        <h3>Mocca</h3>
-                        <div class="precios">
-                            <span>Chico: MX$50</span>
-                            <span>Grande: MX$70</span>
-                        </div>
-                        <button class="btn-agregar" data-id="3" data-nombre="Mocca" data-precio="50" data-precio_grande="70">Agregar</button>
-                    </div>
-
-                    <div class="producto-card">
-                        <h3>Sandwich</h3>
-                        <div class="precios">
-                            <span>Chico: MX$30</span>
-                            <span>Grande: MX$50</span>
-                        </div>
-                        <button class="btn-agregar" data-id="6" data-nombre="Sandwich" data-precio="30" data-precio_grande="50">Agregar</button>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
+            {% if not productos and busqueda %}
+                <p>No se encontraron productos para "{{ busqueda }}".</p>
+            {% endif %}
+
         </main>
     </div>
 
-    <!-- Carrito flotante -->
     <div id="carrito-globo" class="carrito-globo">
         <div class="carrito-contenido">
             <h3>🛒 Tu Pedido</h3>
@@ -110,10 +98,11 @@
                 <label><input type="radio" name="metodo_pago" value="online"> Pagar ahora</label>
             </div>
             
-            <form id="form-pedido" action="/crear_pedido" method="post">
+            <form id="form-pedido" action="{{ url_for('crear_pedido') }}" method="post">
                 <input type="hidden" name="cliente" value="Cliente Móvil">
                 <input type="hidden" name="productos" id="productos-ids" value="">
                 <input type="hidden" name="personalizaciones" id="personalizaciones-data" value="">
+                <input type="hidden" name="metodo_pago" id="metodo_pago-data" value="efectivo">
                 <button type="submit" class="btn-pagar">Confirmar Pedido</button>
             </form>
         </div>
