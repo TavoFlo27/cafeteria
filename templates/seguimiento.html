@@ -3,276 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento Pedido #{{ pedido.id }} - Cafetería Delicia</title>
+    <title>Seguimiento de Pedido #{{ pedido.id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    
-    <style>
-        header { padding: 0; }
-        .header-content {
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; padding: 0.8rem 0; max-width: 1200px;
-            margin: 0 auto; width: 90%;
-        }
-        .header-content h1 { font-size: 1.5rem; margin: 0; flex-shrink: 0; }
-        header nav ul { list-style: none; display: flex; gap: 1.5rem; margin: 0; padding: 0; }
-        header nav a {
-            color: white; text-decoration: none; font-weight: bold;
-            font-size: 0.9rem; text-transform: uppercase; padding-bottom: 5px;
-            border-bottom: 2px solid transparent; transition: border-bottom 0.3s;
-        }
-        header nav a:hover { border-bottom-color: var(--accent); }
-        header nav a.active-nav { border-bottom-color: var(--accent); }
-        @media (max-width: 768px) {
-            .header-content { flex-direction: column; gap: 1rem; }
-            header nav ul { gap: 1.2rem; justify-content: center; width: 100%; font-size: 0.8rem; }
-        }
-    </style>
-    
     <style>
         .seguimiento-container {
-            max-width: 700px;
-            margin: 2rem auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 600px;
+            margin: 3rem auto;
             padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
         .seguimiento-container h2 {
             color: var(--primary);
-            text-align: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+            margin-bottom: 1rem;
         }
-        .pedido-detalle p {
-            margin-bottom: 0.5rem;
-            line-height: 1.7;
+        .estado-actual {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            padding: 0.5rem;
+            border-bottom: 2px solid var(--secondary);
         }
-        .pedido-detalle strong {
-            color: var(--primary);
+        .info-pedido {
+            text-align: left;
+            margin-bottom: 2rem;
         }
-        .productos-lista {
-            margin: 0.5rem 0 1rem 1.5rem; /* Indentación */
-            list-style: disc; /* Viñetas */
+        .info-pedido p {
+            margin: 0.5rem 0;
         }
-        
-        /* Barra de Progreso Visual */
-        .progress-steps {
+        .estado-linea {
             display: flex;
             justify-content: space-between;
-            margin: 2rem 0;
+            align-items: flex-start;
             position: relative;
+            margin: 3rem 0;
         }
-        .progress-steps::before { /* Línea gris de fondo */
+        .estado-linea::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
+            top: 20px;
+            left: 10%;
+            right: 10%;
             height: 4px;
-            width: 100%;
-            background-color: #e0e0e0;
+            background: #e0e0e0;
+            z-index: 0;
+        }
+        .paso {
+            flex: 1;
+            text-align: center;
+            position: relative;
             z-index: 1;
         }
-        .progress-bar { /* Línea de color de progreso */
-            position: absolute;
-            top: 50%;
-            left: 0;
-            transform: translateY(-50%);
-            height: 4px;
-            background-color: var(--accent);
-            z-index: 2;
-            width: 0%; /* Se ajustará con clases */
-            transition: width 0.5s ease;
-        }
-        /* Ajuste de ancho de la barra de progreso */
-        .progress-bar.pago-completado { width: 33%; }
-        .progress-bar.preparacion-completada { width: 66%; }
-        .progress-bar.listo-completado { width: 100%; }
-
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 3;
-            text-align: center;
-        }
-        .step-icon {
+        .paso .icono {
+            font-size: 1.5rem;
+            background-color: #e0e0e0;
+            color: white;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: #e0e0e0; /* Gris por defecto */
-            border: 3px solid #e0e0e0;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            transition: background-color 0.5s, border-color 0.5s;
-        }
-        .step-label {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        /* Estados del paso */
-        .step.completed .step-icon {
-            background-color: var(--accent);
-            border-color: var(--accent);
-        }
-        .step.active .step-icon {
-            background-color: white;
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .step.active .step-label {
-            color: var(--primary);
-            font-weight: bold;
-        }
-        
-        .tiempo-preparacion {
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #e6f7ff;
-            border-radius: 5px;
-            text-align: center;
-            font-weight: bold;
-            border: 1px solid #b3e0ff;
-        }
-        .btn-volver-menu {
-            display: block;
-            width: fit-content;
-            margin: 2rem auto 0 auto;
-            padding: 0.7rem 1.5rem;
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+            margin: 0 auto 5px;
             transition: background-color 0.3s;
         }
-        .btn-volver-menu:hover {
-            background-color: #5a3c2c;
+        
+        /* Icono para Pago Pendiente (Nuevo) */
+        .icono-pendiente-pago {
+            font-size: 1.5rem;
+            background-color: #ffc107; /* Amarillo */
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 5px;
+            font-weight: bold;
+        }
+        /* Fin Icono para Pago Pendiente */
+
+
+        .paso.activo .icono {
+            background-color: var(--primary);
+        }
+        .paso p {
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .paso.activo + .paso::before {
+            background-color: var(--primary);
+        }
+        .productos-lista {
+            text-align: left;
+            padding: 1rem;
+            background: #f8f8f8;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    
-    <header>
-        <div class="header-content container">
-            <h1><a href="{{ url_for('index') }}" style="color:white; text-decoration: none;">☕ Cafetería Delicia</a></h1>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('index') }}">INICIO</a></li>
-                    <li><a href="{{ url_for('nosotros') }}">NOSOTROS</a></li>
-                    <li><a href="{{ url_for('index') }}#carta">LA CARTA</a></li>
-                    <li><a href="{{ url_for('index') }}#encuentranos">LOCALES</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <div class="seguimiento-container">
-            <h2>Seguimiento de Pedido #{{ pedido.id }}</h2>
-
-            <div class="progress-steps">
-                {% set pago_completado = pedido.pago == 'pagado' %}
-                {% set preparacion_iniciada = pago_completado %}
-                {% set preparacion_completada = pedido.estado in ['listo', 'terminado'] %}
-                {% set listo_completado = pedido.estado == 'terminado' %}
-                
-                <div class="progress-bar 
-                    {% if preparacion_completada %}listo-completado{% elif preparacion_iniciada %}preparacion-completada{% elif pago_completado %}pago-completado{% endif %}"
-                    ></div>
-
-                <div class="step {% if pago_completado %}completed{% endif %} {% if pedido.pago == 'pendiente' %}active{% endif %}">
-                    <div class="step-icon">✔</div>
-                    <div class="step-label">Pagado</div>
-                </div>
-                <div class="step {% if preparacion_completada %}completed{% endif %} {% if pedido.estado == 'en preparación' %}active{% endif %}">
-                    <div class="step-icon">🍳</div>
-                    <div class="step-label">En Preparación</div>
-                </div>
-                <div class="step {% if listo_completado %}completed{% endif %} {% if pedido.estado == 'listo' %}active{% endif %}">
-                    <div class="step-icon">👍</div>
-                    <div class="step-label">Listo</div>
-                </div>
+    <div class="seguimiento-container">
+        <h2>Seguimiento de Pedido #{{ pedido.id }}</h2>
+        
+        <div class="info-pedido">
+            <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+            <p><strong>Estado Actual:</strong> <span class="estado-actual">{{ pedido.estado.upper() }}</span></p>
+            <p><strong>Productos:</strong></p>
+            <div class="productos-lista">
+                {{ pedido.productos.replace(' | ', '<br>') }}
             </div>
+            <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
+            <p><strong>Fecha del Pedido:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
 
-            <div class="pedido-detalle">
-                <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-                <p><strong>Estado Actual:</strong> 
-                   <span class="estado-{{ pedido.estado | replace(' ', '-') }}" style="padding: 3px 8px; border-radius: 4px;">
-                       {{ pedido.estado | upper }}
-                   </span>
-                </p>
-                 <p><strong>Productos:</strong></p>
-                <ul class="productos-lista">
-                    {% for producto in pedido.productos.split('|')[0].split(',') %}
-                    <li>{{ producto.strip() }}</li>
-                    {% endfor %}
-                </ul>
-                {% if '|' in pedido.productos and pedido.productos.split('|')[1].strip() %}
-                <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
-                {% endif %}
-                <p><strong>Total Pagado:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
-                <p><strong>Fecha del Pedido:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
-                
-                {% if pedido.pago == 'pagado' and pedido.hora_preparacion and pedido.estado != 'terminado' %}
-                <div class="tiempo-preparacion">
-                    {% if datetime.now() < pedido.hora_preparacion and pedido.estado != 'listo' %}
-                    <p>Tiempo estimado restante: {{ ((pedido.hora_preparacion - datetime.now()).seconds // 60) + 1 }} minutos</p>
-                    {% elif pedido.estado == 'listo' %}
-                     <p>✅ ¡Tu pedido está listo para recoger!</p>
-                    {% else %}
-                     <p>⏳ Preparando tu pedido...</p>
-                    {% endif %}
-                </div>
-                {% elif pedido.estado == 'terminado' %}
-                 <div class="tiempo-preparacion" style="background-color: #D4EDDA; border-color: #c3e6cb;">
-                    <p>🎉 ¡Pedido completado y entregado!</p>
-                 </div>
+        <div class="estado-linea">
+            
+            <div class="paso {% if pedido.pago == 'pagado' %}activo{% endif %}">
+                {% if pedido.pago == 'pagado' %}
+                    <span class="icono">✔</span>
+                    <p>Pagado</p>
+                {% else %}
+                    <span class="icono-pendiente-pago">...</span> 
+                    <p>Pendiente de Pago</p>
                 {% endif %}
             </div>
-
-            <a href="{{ url_for('index') }}" class="btn-volver-menu">Volver al Menú Principal</a>
-        </div>
-    </main>
-
-    <footer id="encuentranos">
-        <div class="footer-content container">
-            <div class="footer-section">
-                <h4>HORARIOS</h4>
-                <p>Lunes a Viernes: 7am - 9pm</p>
-                <p>Sábado y Domingo: 9am - 8pm</p>
+            
+            <div class="paso {% if pedido.pago == 'pagado' and pedido.estado != 'terminado' %}activo{% endif %}">
+                <span class="icono">🍳</span>
+                <p>En Preparación</p>
             </div>
-            <div class="footer-section">
-                <h4>ENCUÉNTRANOS EN</h4>
-                <p>Av. Siempre Viva 123, Col. Centro</p>
-                <p>Teléfono: (55) 1234-5678</p>
-                <p>Email: contacto@delicia.com</p>
-            </div>
-            <div class="footer-section">
-                <h4>SÍGUENOS</h4>
-                <a href="#" target="_blank">Facebook</a> | 
-                <a href="#" target="_blank">YouTube</a> |
-                <a href="#" target="_blank">Instagram</a>
+
+            <div class="paso {% if pedido.estado == 'listo' or pedido.estado == 'terminado' %}activo{% endif %}">
+                <span class="icono">👍</span>
+                <p>Listo</p>
             </div>
         </div>
-        <div class="footer-creditos">
-            <p>Diseño web: [Tu Nombre o Empresa Aquí]</p>
-        </div>
-    </footer>
 
-    <script>
-        // Actualización automática cada 30 segundos
-        // Solo si el pedido no está terminado
-        if ("{{ pedido.estado }}" !== "terminado") {
-            setTimeout(() => {
-                window.location.reload();
-            }, 30000);
-        }
-    </script>
+        {% if pedido.hora_preparacion %}
+        <div class="tiempo-estimado">
+            Tiempo estimado de finalización: **{{ pedido.hora_preparacion.strftime('%H:%M') }}**
+        </div>
+        {% endif %}
+
+        <p style="margin-top: 2rem;"><a href="{{ url_for('index') }}">← Volver al Menú</a></p>
+    </div>
 </body>
 </html>

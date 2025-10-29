@@ -205,8 +205,18 @@ header {
     justify-content: space-between;
     margin-bottom: 0.75rem;
 }
-.producto-card-v2 .btn-abrir-modal {
-    background-color: var(--accent);
+.producto-card-v2 .precio-unico { /* Estilo para precio único (Repostería/Sándwiches) */
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+/* Estilos de los botones de agregar (Aplica a ambos tipos de botones) */
+.btn-abrir-modal, /* Botón original para Bebidas */
+.btn-agregar-directo /* Botón para Repostería/Sándwiches */
+{
+    background-color: var(--accent); /* Color amarillo/dorado */
     color: white;
     border: none;
     padding: 0.5rem;
@@ -214,8 +224,11 @@ header {
     width: 100%;
     font-size: 0.9rem;
     cursor: pointer;
+    transition: background 0.3s;
 }
-.producto-card-v2 .btn-abrir-modal:hover {
+.btn-abrir-modal:hover,
+.btn-agregar-directo:hover
+{
     background-color: #d4a017;
 }
 
@@ -274,12 +287,9 @@ header {
     transform-origin: bottom right;
     transition: transform 0.3s, opacity 0.3s;
     opacity: 0;
-    /* Para que el contenido interno (lista, personalizaciones) no se desborde */
+    max-height: 85vh; /* Altura aumentada para mejor visualización */
     display: flex;
     flex-direction: column;
-    /* ===== MODIFICACIÓN AQUÍ ===== */
-    max-height: 85vh; /* Aumentamos la altura máxima total del contenido del carrito */
-    /* ===== FIN MODIFICACIÓN ===== */
 }
 .carrito-globo.activo .carrito-contenido {
     transform: scale(1);
@@ -288,11 +298,10 @@ header {
 
 /* Lista de items */
 #lista-carrito {
-    /* Ya no necesita max-height ni overflow */
     margin: 0.5rem 0;
     list-style: none;
     padding-right: 5px;
-    flex-shrink: 0; /* Evita que se encoja si hay muchas personalizaciones */
+    flex-shrink: 0;
 }
 #lista-carrito li {
     padding: 0.75rem 0;
@@ -304,18 +313,18 @@ header {
     font-weight: bold;
     text-align: right;
     margin: 0.5rem 0;
-    flex-shrink: 0; /* Evita que se encoja */
+    flex-shrink: 0;
 }
 
 /* Contenedor de Personalizaciones */
 .personalizacion {
     margin: 1rem 0;
-    flex-grow: 1; /* Permite que esta sección ocupe el espacio sobrante */
+    flex-grow: 1; 
     overflow-y: auto; /* Scroll SÓLO para las personalizaciones */
-    padding-right: 5px; /* Espacio para la barra de scroll */
+    padding-right: 5px; 
 }
 .personalizacion h4 {
-    margin-bottom: 0.5rem; /* Espacio bajo el título */
+    margin-bottom: 0.5rem; 
 }
 
 /* Bloque de una personalización */
@@ -338,8 +347,8 @@ header {
 
 /* Formulario (Nombre, Pago, Botón) */
 #form-pedido {
-    flex-shrink: 0; /* Evita que se encoja */
-    margin-top: 1rem; /* Espacio arriba del nombre */
+    flex-shrink: 0; 
+    margin-top: 1rem; 
 }
 
 .btn-pagar {
@@ -449,17 +458,17 @@ footer {
 
 /* --- Nuevos Estilos para Controles de Cantidad en Carrito --- */
 #lista-carrito li,
-#lista-carrito-pos li /* Aplicar a ambos carritos */
+#lista-carrito-pos li 
 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px; /* Espacio entre info y controles */
+    gap: 10px; 
 }
 
 .item-info {
-    flex-grow: 1; /* Ocupa el espacio disponible */
-    margin-right: 10px; /* Separa del primer botón */
+    flex-grow: 1; 
+    margin-right: 10px; 
 }
 .item-info small {
     color: #555;
@@ -469,8 +478,8 @@ footer {
 .item-controles {
     display: flex;
     align-items: center;
-    gap: 5px; /* Espacio entre botones */
-    flex-shrink: 0; /* Evita que los controles se encojan */
+    gap: 5px; 
+    flex-shrink: 0; 
 }
 
 .btn-cantidad {
@@ -482,7 +491,7 @@ footer {
     border-radius: 50%;
     font-weight: bold;
     cursor: pointer;
-    line-height: 20px; /* Centrar texto verticalmente */
+    line-height: 20px; 
     text-align: center;
     padding: 0;
 }
@@ -491,18 +500,18 @@ footer {
 }
 .cantidad {
     font-weight: bold;
-    min-width: 20px; /* Asegura espacio para números de 2 dígitos */
+    min-width: 20px; 
     text-align: center;
 }
 
 .eliminar-producto,
-.eliminar-producto-pos /* Aplicar a ambos carritos */
+.eliminar-producto-pos 
 {
     background: #ff4d4d;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 22px; /* Mismo tamaño que +/- */
+    width: 22px; 
     height: 22px;
     cursor: pointer;
     font-weight: bold;
@@ -551,6 +560,19 @@ header nav a:hover {
 }
 header nav a.active-nav {
     border-bottom-color: var(--accent);
+}
+.icono-pendiente-pago {
+    font-size: 1.5rem;
+    background-color: #ffc107; /* Amarillo */
+    color: var(--text);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 5px; 
+    font-weight: bold;
 }
 @media (max-width: 768px) {
     .header-content {
