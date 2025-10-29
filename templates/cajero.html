@@ -3,98 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cajero - Cafetería</title>
+    <title>Cajero (POS) - Cafetería</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
     <style>
-        .contenedor-cajero {
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000; display: none;
+        }
+        .modal-contenido {
+            position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: white; border-radius: 8px;
+            padding: 1.5rem; z-index: 2001;
+            width: 300px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: none;
+        }
+        .modal-contenido h3 { margin-bottom: 1rem; color: var(--primary); }
+        .modal-opciones button {
+            display: block; width: 100%; padding: 0.8rem;
+            margin-bottom: 0.5rem; border: 2px solid var(--secondary);
+            background: white; border-radius: 5px; font-size: 1rem;
+            cursor: pointer;
+        }
+        .modal-opciones button:hover { background: #f9f5f0; }
+        .modal-opciones button .precio { font-weight: bold; color: var(--primary); }
+    </style>
+
+    <style>
+        body { background-color: #eee; } /* Fondo distinto para el panel de admin */
+        .contenedor-pos {
             display: flex;
             gap: 1rem;
             padding: 1rem;
+            height: calc(100vh - 60px); /* Altura completa menos el header */
         }
-        .columna-productos, .columna-pago {
-            flex: 1;
-        }
-        .pedido-card {
+        
+        /* Col 1: Productos */
+        .columna-pos-productos {
+            flex: 2;
             background: white;
             border-radius: 8px;
             padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        /* Col 2: Carrito del POS */
+        .columna-pos-carrito {
+            flex: 1.5;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .pos-cart-form { flex-grow: 1; display: flex; flex-direction: column; }
+        #lista-carrito-pos {
+            list-style: none;
+            padding-left: 0;
+            max-height: 250px;
+            overflow-y: auto;
+            border-bottom: 1px solid #eee;
+        }
+        #lista-carrito-pos li {
+            padding: 0.5rem 0;
+            border-top: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .total-pos {
+            font-size: 1.5rem; font-weight: bold;
+            text-align: right; margin: 1rem 0;
+        }
+        .btn-cobrar {
+            background: #28a745; /* Verde */
+            color: white; border: none; padding: 1rem;
+            font-size: 1.2rem; border-radius: 5px; cursor: pointer;
+        }
+        .cliente-input-group { margin-bottom: 1rem; }
+        .cliente-input-group label { font-weight: bold; display: block; margin-bottom: 0.3rem; }
+        .cliente-input-group input { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 5px; }
+        .eliminar-producto-pos {
+             background: #ff4d4d; color: white; border: none;
+             border-radius: 50%; width: 20px; height: 20px;
+             cursor: pointer; font-weight: bold; line-height: 18px;
+             flex-shrink: 0;
+        }
+
+        /* Col 3: Pedidos Pendientes */
+        .columna-pedidos-pendientes {
+            flex: 1.5;
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .pedido-card {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
             margin-bottom: 1rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .pago-select {
-            width: 100%;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
-            border: 2px solid var(--secondary);
-            border-radius: 5px;
-        }
-        .btn-actualizar {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            width: 100%;
-            margin-top: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .estado-pagado { color: green; font-weight: bold; }
         .estado-pendiente { color: orange; font-weight: bold; }
-        .productos-lista {
-            margin: 0.5rem 0;
-            padding-left: 1rem;
-        }
+        .pago-select, .btn-actualizar { width: 100%; padding: 0.5rem; margin-top: 0.5rem; border-radius: 5px; }
+        .pago-select { border: 1px solid #ccc; }
+        .btn-actualizar { background: var(--primary); color: white; border: none; cursor: pointer; }
+        .productos-lista-sm { list-style: none; padding-left: 0; font-size: 0.9rem; }
     </style>
 </head>
 <body>
     <header>
-        <h1>💵 Cajero</h1>
+        <h1>💵 Cajero (Punto de Venta)</h1>
     </header>
 
-    <div class="contenedor-cajero">
-        <div class="columna-productos">
-            <h2>Pedidos Recientes</h2>
-            {% for pedido in pedidos %}
-            <div class="pedido-card">
-                <h3>Pedido #{{ pedido.id }}</h3>
-                <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-                <p><strong>Productos:</strong></p>
-                <ul class="productos-lista">
-                    {% for producto in pedido.productos.split('|')[0].split(',') %}
-                    <li>{{ producto.strip() }}</li>
+    <div class="contenedor-pos">
+
+        <div class="columna-pos-productos">
+            <h2>Hacer Pedido</h2>
+            <div class="productos-grid">
+                <div class="producto-columna">
+                    {% for producto in productos[:(productos|length // 2) + (productos|length % 2)] %}
+                    <div class="producto-card">
+                        <h3>{{ producto.nombre }}</h3>
+                        <div class="precios">
+                            <span>Ch: ${{ "%.2f"|format(producto.precio) }}</span>
+                            {% if producto.precio_grande %}
+                            <span>Gd: ${{ "%.2f"|format(producto.precio_grande) }}</span>
+                            {% endif %}
+                        </div>
+                        <button class="btn-abrir-modal-pos" 
+                                data-id="{{ producto.id }}" 
+                                data-nombre="{{ producto.nombre }}" 
+                                data-precio="{{ producto.precio }}" 
+                                data-precio_grande="{{ producto.precio_grande or producto.precio }}">
+                            Agregar
+                        </button>
+                    </div>
                     {% endfor %}
-                </ul>
-                {% if '|' in pedido.productos %}
-                <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
-                {% endif %}
-                <p><strong>Total:</strong> ${{ pedido.total }}</p>
-                <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%H:%M') }}</p>
+                </div>
+                <div class="producto-columna">
+                    {% for producto in productos[(productos|length // 2) + (productos|length % 2):] %}
+                    <div class="producto-card">
+                        <h3>{{ producto.nombre }}</h3>
+                        <div class="precios">
+                            <span>Ch: ${{ "%.2f"|format(producto.precio) }}</span>
+                            {% if producto.precio_grande %}
+                            <span>Gd: ${{ "%.2f"|format(producto.precio_grande) }}</span>
+                            {% endif %}
+                        </div>
+                        <button class="btn-abrir-modal-pos" 
+                                data-id="{{ producto.id }}" 
+                                data-nombre="{{ producto.nombre }}" 
+                                data-precio="{{ producto.precio }}" 
+                                data-precio_grande="{{ producto.precio_grande or producto.precio }}">
+                            Agregar
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
         </div>
 
-        <div class="columna-pago">
-            <h2>Estado de Pago</h2>
+        <div class="columna-pos-carrito">
+            <form id="form-pedido-pos" class="pos-cart-form" action="{{ url_for('crear_pedido_cajero') }}" method="post">
+                <div>
+                    <h3>Cobrar Pedido</h3>
+                    <div class="cliente-input-group">
+                        <label for="cliente_nombre_pos">Nombre del Cliente:</label>
+                        <input type="text" id="cliente_nombre_pos" name="cliente_nombre_pos" value="Cliente Mostrador" required>
+                    </div>
+                    <ul id="lista-carrito-pos">
+                        </ul>
+                </div>
+                
+                <div style="margin-top: auto;"> <div id="personalizaciones-container-pos" style="max-height: 150px; overflow-y: auto; padding-right: 10px;"></div>
+
+                    <div class="total-pos">
+                        Total: <span id="total-carrito-pos">MX$0.00</span>
+                    </div>
+
+                    <input type="hidden" name="productos_pos" id="productos-data-pos" value="">
+                    <input type="hidden" name="personalizaciones_pos" id="personalizaciones-data-pos" value="">
+                    
+                    <button type="submit" class="btn-cobrar">Cobrar y Enviar a Preparación</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="columna-pedidos-pendientes">
+            <h2>Pedidos Pendientes (de Clientes)</h2>
             {% for pedido in pedidos %}
-            <div class="pedido-card">
-                <h3>Pedido #{{ pedido.id }}</h3>
-                <p class="estado-{{ pedido.pago }}">Pago: {{ pedido.pago | upper }}</p>
-                <form action="/actualizar_pago/{{ pedido.id }}" method="post">
-                    <select name="pago" class="pago-select">
-                        <option value="pendiente" {% if pedido.pago == 'pendiente' %}selected{% endif %}>Pendiente</option>
-                        <option value="pagado" {% if pedido.pago == 'pagado' %}selected{% endif %}>Pagado</option>
-                    </select>
-                    <button type="submit" class="btn-actualizar">Actualizar Pago</button>
-                </form>
-            </div>
+                {% if pedido.pago == 'pendiente' %}
+                <div class="pedido-card">
+                    <h3>Pedido #{{ pedido.id }} (Pendiente)</h3>
+                    <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+                    <ul class="productos-lista-sm">
+                        {% for producto in pedido.productos.split('|')[0].split(',') %}
+                        <li>- {{ producto.strip() }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
+                    <p class="estado-{{ pedido.pago }}">Pago: {{ pedido.pago | upper }}</p>
+                    <form action="{{ url_for('actualizar_pago', id=pedido.id) }}" method="post">
+                        <select name="pago" class="pago-select">
+                            <option value="pendiente" selected>Pendiente</option>
+                            <option value="pagado">Marcar como Pagado</option>
+                        </select>
+                        <button type="submit" class="btn-actualizar">Actualizar Pago</button>
+                    </form>
+                </div>
+                {% endif %}
+            {% endfor %}
+            <h2 style="margin-top: 1rem;">Pedidos Recientes (Pagados)</h2>
+            {% for pedido in pedidos %}
+                {% if pedido.pago == 'pagado' %}
+                <div class="pedido-card">
+                    <h3>Pedido #{{ pedido.id }}</h3>
+                    <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+                    <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
+                    <p class="estado-{{ pedido.estado | replace(' ', '-') }}">{{ pedido.estado | upper }}</p>
+                </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>
 
-    <script>
-        // Actualizar cada 30 segundos
-        setTimeout(() => {
-            window.location.reload();
-        }, 30000);
-    </script>
+    <div id="modal-backdrop-pos" class="modal-backdrop"></div>
+    <div id="modal-tamanos-pos" class="modal-contenido">
+        <h3 id="modal-nombre-producto-pos">Selecciona un tamaño</h3>
+        <div id="modal-opciones-container-pos" class="modal-opciones">
+            </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='pos.js') }}"></script>
 </body>
 </html>

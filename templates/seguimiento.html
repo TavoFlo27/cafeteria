@@ -64,10 +64,10 @@
                 <li>{{ producto.strip() }}</li>
                 {% endfor %}
             </ul>
-            {% if '|' in pedido.productos %}
+            {% if '|' in pedido.productos and pedido.productos.split('|')[1].strip() %}
             <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
             {% endif %}
-            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
             <p><strong>Fecha:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
             <p><strong>Estado de pago:</strong> {{ pedido.pago | upper }}</p>
             
@@ -86,7 +86,7 @@
             {% endif %}
         </div>
 
-        <a href="/" class="btn-volver">Volver al Menú</a>
+        <a href="{{ url_for('index') }}" class="btn-volver">Volver al Menú</a>
     </main>
 
     <script>

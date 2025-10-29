@@ -28,6 +28,7 @@
             border-radius: 5px;
             width: 100%;
             margin-top: 0.5rem;
+            cursor: pointer;
         }
         .tiempo-preparacion {
             margin-top: 0.5rem;
@@ -51,7 +52,7 @@
         <h1>👨‍🍳 Barista</h1>
     </header>
 
-    <main class="container">
+    <main class="container" style="max-width: 800px; margin: 1rem auto;">
         <h2>Pedidos Pagados</h2>
         
         {% if not pedidos %}
@@ -68,13 +69,13 @@
                 <li>{{ producto.strip() }}</li>
                 {% endfor %}
             </ul>
-            {% if '|' in pedido.productos %}
+            {% if '|' in pedido.productos and pedido.productos.split('|')[1].strip() %}
             <p><strong>Personalizaciones:</strong> {{ pedido.productos.split('|')[1] }}</p>
             {% endif %}
-            <p><strong>Total:</strong> ${{ pedido.total }}</p>
+            <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
             <p><strong>Estado actual:</strong> <span class="estado-{{ pedido.estado | replace(' ', '-') }}">{{ pedido.estado }}</span></p>
             
-            {% if pedido.pago == 'pagado' %}
+            {% if pedido.pago == 'pagado' and pedido.hora_preparacion %}
             <div class="tiempo-preparacion">
                 {% if ahora < pedido.hora_preparacion %}
                 <p>Tiempo restante: {{ ((pedido.hora_preparacion - ahora).seconds // 60) + 1 }} minutos</p>
@@ -84,7 +85,7 @@
             </div>
             {% endif %}
             
-            <form action="/actualizar_estado/{{ pedido.id }}" method="post">
+            <form action="{{ url_for('actualizar_estado', id=pedido.id) }}" method="post">
                 <select name="estado" class="estado-select">
                     <option value="en preparación" {% if pedido.estado == 'en preparación' %}selected{% endif %}>En preparación</option>
                     <option value="listo" {% if pedido.estado == 'listo' %}selected{% endif %}>Listo</option>

@@ -1,34 +1,37 @@
+/* * ==========================================
+ * SCRIPT PARA EL PUNTO DE VENTA (POS.JS)
+ * ==========================================
+ * Es una copia de 'script.js' pero adaptada
+ * a los IDs de 'cajero.html' (ej: 'lista-carrito-pos')
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Array del carrito. Guarda objetos de producto
+    // Array del carrito (local para el POS)
     const carrito = [];
     
-    // Referencias al DOM (Carrito)
-    const carritoGlobo = document.getElementById('carrito-globo');
-    const listaCarrito = document.getElementById('lista-carrito');
-    const contadorCarrito = document.getElementById('contador-carrito');
-    const totalCarrito = document.getElementById('total-carrito');
-    const productosData = document.getElementById('productos-data'); 
-    const personalizacionesData = document.getElementById('personalizaciones-data');
-    const personalizacionesContainer = document.getElementById('personalizaciones-container');
+    // Referencias al DOM (Carrito del POS)
+    const listaCarrito = document.getElementById('lista-carrito-pos');
+    const totalCarrito = document.getElementById('total-carrito-pos');
+    const productosData = document.getElementById('productos-data-pos'); 
+    const personalizacionesData = document.getElementById('personalizaciones-data-pos');
+    const personalizacionesContainer = document.getElementById('personalizaciones-container-pos');
     
-    // Referencias al DOM (Formulario)
-    const formPedido = document.getElementById('form-pedido');
+    // Referencias al DOM (Formulario del POS)
+    const formPedido = document.getElementById('form-pedido-pos');
     
-    // Referencias al DOM (Modal)
-    const modalBackdrop = document.getElementById('modal-backdrop');
-    const modalTamanos = document.getElementById('modal-tamanos');
-    const modalNombreProducto = document.getElementById('modal-nombre-producto');
-    const modalOpcionesContainer = document.getElementById('modal-opciones-container');
+    // Referencias al DOM (Modal del POS)
+    const modalBackdrop = document.getElementById('modal-backdrop-pos');
+    const modalTamanos = document.getElementById('modal-tamanos-pos');
+    const modalNombreProducto = document.getElementById('modal-nombre-producto-pos');
+    const modalOpcionesContainer = document.getElementById('modal-opciones-container-pos');
     
-    // Variable temporal para el producto que se está agregando
     let productoTemporal = null;
 
     // --- LÓGICA DEL MODAL ---
 
-    // 1. Abrir el modal al hacer clic en "Agregar"
-    document.querySelectorAll('.btn-abrir-modal').forEach(btn => {
+    // 1. Abrir el modal al hacer clic en 'btn-abrir-modal-pos'
+    document.querySelectorAll('.btn-abrir-modal-pos').forEach(btn => {
         btn.addEventListener('click', function() {
-            // Guarda los datos del producto desde los atributos 'data-'
             productoTemporal = {
                 id: this.dataset.id,
                 nombre: this.dataset.nombre,
@@ -36,11 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 precioGrande: parseFloat(this.dataset.precio_grande)
             };
             
-            // Llena el contenido del modal
             modalNombreProducto.textContent = productoTemporal.nombre;
-            modalOpcionesContainer.innerHTML = ''; // Limpia opciones anteriores
+            modalOpcionesContainer.innerHTML = ''; 
 
-            // Crea el botón para "Chico"
             const btnChico = document.createElement('button');
             btnChico.type = 'button';
             btnChico.innerHTML = `Chico <span class="precio">MX$${productoTemporal.precioChico.toFixed(2)}</span>`;
@@ -48,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnChico.dataset.precio = productoTemporal.precioChico;
             modalOpcionesContainer.appendChild(btnChico);
 
-            // Crea el botón para "Grande" (solo si el precio es diferente)
             if (productoTemporal.precioGrande && productoTemporal.precioGrande !== productoTemporal.precioChico) {
                 const btnGrande = document.createElement('button');
                 btnGrande.type = 'button';
@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalOpcionesContainer.appendChild(btnGrande);
             }
 
-            // Muestra el modal
             modalBackdrop.style.display = 'block';
             modalTamanos.style.display = 'block';
         });
@@ -72,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     modalBackdrop.addEventListener('click', cerrarModal);
 
-    // 3. Agregar al carrito al seleccionar un tamaño en el modal
+    // 3. Agregar al carrito
     modalOpcionesContainer.addEventListener('click', function(e) {
         const botonSeleccionado = e.target.closest('button');
         if (!botonSeleccionado) return;
@@ -80,19 +79,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const tamano = botonSeleccionado.dataset.tamano;
         const precio = parseFloat(botonSeleccionado.dataset.precio);
 
-        // Evita duplicados (mismo producto, mismo tamaño)
         const existe = carrito.some(item => item.id === productoTemporal.id && item.tamano === tamano);
         if (existe) {
             alert('Este producto con este tamaño ya está en tu carrito');
             return;
         }
 
-        // ID único para este item en el carrito (permite eliminar uno sin borrar otros)
         const carritoItemId = `${productoTemporal.id}-${tamano}-${Date.now()}`;
 
         carrito.push({
-            carritoId: carritoItemId, // ID único para el carrito
-            id: productoTemporal.id,  // ID original del producto
+            carritoId: carritoItemId, 
+            id: productoTemporal.id,  
             nombre: productoTemporal.nombre,
             tamano: tamano,
             precio: precio
@@ -100,24 +97,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         actualizarCarrito();
         mostrarOpcionesPersonalizacion(carritoItemId, `${productoTemporal.nombre} (${tamano})`);
-
-        carritoGlobo.classList.add('activo');
+        
         cerrarModal();
     });
 
 
     // --- LÓGICA DEL CARRITO ---
 
-    // Toggle para mostrar/ocultar el carrito
-    carritoGlobo.addEventListener('click', function(e) {
-        if (e.target.closest('.carrito-icono')) {
-            this.classList.toggle('activo');
-        }
-    });
-
     // Actualiza los datos ocultos justo antes de enviar el formulario
     formPedido.addEventListener('submit', function() {
         actualizarCarrito();
+        // Nota: El carrito se vaciará automáticamente cuando la página se recargue
+        // después de enviar el formulario.
     });
 
     // Muestra las opciones de personalización para un item
@@ -140,10 +131,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 </label>
                 <label>
                     Notas especiales:
-                    <input type="text" name="notas_${carritoItemId}" placeholder="Ej: Sin hielo, extra caliente...">
+                    <input type="text" name="notas_${carritoItemId}" placeholder="Ej: Sin hielo...">
                 </label>
             </div>
         `;
+        // Usamos 'personalizacionesContainer' que apunta a '#personalizaciones-container-pos'
         personalizacionesContainer.insertAdjacentHTML('beforeend', opciones);
     }
 
@@ -152,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         listaCarrito.innerHTML = '';
         let total = 0;
         let personalizacionesTexto = [];
-        let productosParaEnviar = []; // Array que se convertirá en JSON
+        let productosParaEnviar = []; 
 
         carrito.forEach(item => {
             const nombreCompleto = `${item.nombre} (${item.tamano})`;
@@ -163,26 +155,22 @@ document.addEventListener('DOMContentLoaded', () => {
                  personalizacionesTexto.push(`${nombreCompleto}: ${personalizacion.texto}`);
             }
            
-            // Crea el 'li' para la lista del carrito
             const li = document.createElement('li');
             li.innerHTML = `
                 <span>${descripcion} (MX$${item.precio.toFixed(2)})</span>
-                <button type="button" class="eliminar-producto" data-id="${item.carritoId}">&times;</button>
+                <button type="button" class="eliminar-producto-pos" data-id="${item.carritoId}">&times;</button>
             `;
             listaCarrito.appendChild(li);
             total += item.precio;
 
-            // Agrega el item al array que se enviará al backend
             productosParaEnviar.push({
                 id: item.id,
                 tamano: item.tamano
             });
         });
 
-        contadorCarrito.textContent = carrito.length;
         totalCarrito.textContent = `MX$${total.toFixed(2)}`;
         
-        // Convierte el array de productos a un string JSON y lo pone en el input oculto
         productosData.value = JSON.stringify(productosParaEnviar);
         personalizacionesData.value = personalizacionesTexto.join(' | ');
     }
@@ -209,31 +197,21 @@ document.addEventListener('DOMContentLoaded', () => {
         return { texto: texto.trim() };
     }
 
-    // Cierra el carrito si se hace clic fuera de él
-    document.addEventListener('click', function(e) {
-        if (!carritoGlobo.contains(e.target)) {
-            carritoGlobo.classList.remove('activo');
-        }
-    });
-
     // Lógica para el botón de eliminar producto del carrito
     listaCarrito.addEventListener('click', function(e) {
-        if (e.target.classList.contains('eliminar-producto')) {
+        if (e.target.classList.contains('eliminar-producto-pos')) {
             const carritoId = e.target.dataset.id;
             
-            // 1. Eliminar del array 'carrito'
             const index = carrito.findIndex(item => item.carritoId === carritoId);
             if (index !== -1) {
                 carrito.splice(index, 1);
             }
             
-            // 2. Eliminar su HTML de personalización
             const personalizacion = document.querySelector(`.opcion-personalizacion[data-id="${carritoId}"]`);
             if (personalizacion) {
                 personalizacion.remove();
             }
 
-            // 3. Actualizar la vista del carrito
             actualizarCarrito();
         }
     });

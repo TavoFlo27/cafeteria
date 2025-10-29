@@ -1,8 +1,8 @@
 :root {
-    --primary: #6F4E37;
-    --secondary: #C4A484;
-    --accent: #E3B04B;
-    --text: #2D2424;
+    --primary: #6F4E37; /* Marrón café oscuro */
+    --secondary: #C4A484; /* Marrón claro (como capuchino) */
+    --accent: #E3B04B; /* Dorado/Amarillo */
+    --text: #2D2424; /* Texto casi negro */
 }
 
 * {
@@ -13,10 +13,10 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #F9F5F0;
+    background-color: #F9F5F0; /* Fondo color crema muy claro */
     color: var(--text);
     line-height: 1.6;
-    padding-bottom: 80px;
+    padding-bottom: 80px; /* Espacio para el carrito flotante */
 }
 
 header {
@@ -56,6 +56,7 @@ header {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+    cursor: pointer;
 }
 
 .contenedor-principal {
@@ -67,13 +68,13 @@ header {
 .columna-categorias {
     padding: 0.8rem;
     background: white;
-    overflow-x: auto;
+    overflow-x: auto; /* Permite scroll horizontal en móvil */
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
 }
 
 .columna-categorias h2 {
-    display: none;
+    display: none; /* Oculto en móvil */
 }
 
 .categorias-list {
@@ -141,7 +142,7 @@ header {
     font-size: 0.9rem;
 }
 
-.btn-agregar {
+.btn-abrir-modal {
     background-color: var(--accent);
     color: white;
     border: none;
@@ -153,7 +154,7 @@ header {
     transition: background 0.3s;
 }
 
-.btn-agregar:hover {
+.btn-abrir-modal:hover {
     background-color: #d4a017;
 }
 
@@ -224,8 +225,6 @@ header {
 #lista-carrito li {
     padding: 0.5rem 0;
     border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
 }
 
 .carrito-total {
@@ -251,7 +250,6 @@ header {
     background-color: #5a3c2c;
 }
 
-/* Estilos para personalizaciones */
 .opciones-pago {
     margin: 1rem 0;
     padding: 0.5rem;
@@ -321,6 +319,7 @@ header {
     color: #6c757d;
 }
 
+/* Media Queries para Responsividad */
 @media (min-width: 900px) {
     .contenedor-principal {
         flex-direction: row;
