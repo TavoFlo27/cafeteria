@@ -251,17 +251,17 @@ if __name__ == '__main__':
         if not Producto.query.first():
             db.session.add_all([
                 # Bebidas (con dos precios)
-                Producto(nombre="Macchiato", precio=30.0, precio_grande=45.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1596707851619-3cb161e47993?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNhcmFtZWwlMjBtYWNjaGlhdG98ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
+                Producto(nombre="Macchiato", precio=30.0, precio_grande=45.0, categoria="Bebidas", imagen="https://i.postimg.cc/6Qb1hzXH/Macchiato.webp"),
                 Producto(nombre="Espresso", precio=20.0, precio_grande=35.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXNwcmVzc298ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
                 Producto(nombre="Mocca", precio=50.0, precio_grande=70.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1541167760496-1628856ab772?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9jaGElMjBjb2ZmZWV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
-                Producto(nombre="Latte", precio=40.0, precio_grande=55.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1587085799378-6d8063a5c13c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNvZmZlZSUyMGxhdHRlfGVufDB8fDB8fHww&auto=format&fit=crop&w=400&q=60"),
+                Producto(nombre="Latte", precio=40.0, precio_grande=55.0, categoria="Bebidas", imagen="https://i.postimg.cc/W4Yf7SvX/Latte.webp"),
                 # Repostería (solo un precio, precio_grande=None)
-                Producto(nombre="Cheesecake", precio=35.0, precio_grande=None, categoria="Repostería", imagen="https://images.unsplash.com/photo-1543362145-42289651544a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHN0cmF3YmVycnklMjBjaGVlc2VjYWtlfGVufDB8fDB8fHww&auto=format&fit=crop&w=400&q=60"),
-                Producto(nombre="Cupcake", precio=28.0, precio_grande=None, categoria="Repostería", imagen="https://images.unsplash.com/photo-1615478503562-ec2d8aa0464e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGN1cGNha2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
+                Producto(nombre="Cheesecake", precio=35.0, precio_grande=None, categoria="Repostería", imagen="https://i.postimg.cc/pdc1BkHQ/Cheesecake.webp"),
+                Producto(nombre="Cupcake", precio=28.0, precio_grande=None, categoria="Repostería", imagen="https://i.postimg.cc/R0pbTGBQ/Cupcake.webp"),
                 Producto(nombre="Dona", precio=20.0, precio_grande=None, categoria="Repostería", imagen="https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZG9udXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
                 # Sándwiches (solo un precio, precio_grande=None)
-                Producto(nombre="Sandwich Pavo", precio=45.0, precio_grande=None, categoria="Sándwiches", imagen="https://images.unsplash.com/photo-1528607929019-5c91b5a5f129?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHVya2V5JTIwc2FuZHdpY2h8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
-                Producto(nombre="Sandwich Club", precio=55.0, precio_grande=None, categoria="Sándwiches", imagen="https://plus.unsplash.com/premium_photo-1673809798404-95713426611a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8Y2x1YiUyMHNhbmR3aWNofGVufDB8fDB8fHww&auto=format&fit=crop&w=400&q=60")
+                Producto(nombre="Sandwich Pavo", precio=45.0, precio_grande=None, categoria="Sándwiches", imagen="https://i.postimg.cc/N0CPxbc4/Sandwich-Pavo.webp"),
+                Producto(nombre="Sandwich Club", precio=55.0, precio_grande=None, categoria="Sándwiches", imagen="https://i.postimg.cc/jj3khvbc/Sandwich-Club.webp")
             ])
             db.session.commit()
     app.run(debug=True)
