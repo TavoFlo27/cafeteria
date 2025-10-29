@@ -1,0 +1,19 @@
+<div class="producto-card-v2">
+    <img src="{{ producto.imagen }}" alt="{{ producto.nombre }}">
+    <div class="producto-info">
+        <h3>{{ producto.nombre }}</h3>
+        <div class="precios">
+            <span>Ch: ${{ "%.2f"|format(producto.precio) }}</span>
+            {% if producto.precio_grande and producto.precio_grande != producto.precio %}
+            <span>Gd: ${{ "%.2f"|format(producto.precio_grande) }}</span>
+            {% endif %}
+        </div>
+        <button class="btn-abrir-modal" 
+                data-id="{{ producto.id }}" 
+                data-nombre="{{ producto.nombre }}" 
+                data-precio="{{ producto.precio }}" 
+                data-precio_grande="{{ producto.precio_grande or producto.precio }}">
+            Agregar
+        </button>
+    </div>
+</div>
