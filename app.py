@@ -78,17 +78,15 @@ def crear_pedido():
         precio_unitario = 0
         descripcion_tamano = ""
 
-        # Lógica de precio/descripción
         if producto.categoria in ["Repostería", "Sándwiches"]:
             precio_unitario = producto.precio
-            descripcion_tamano = "" 
-        else: # Para Bebidas
+        else:
             if tamano == 'grande' and producto.precio_grande:
                 precio_unitario = producto.precio_grande
                 descripcion_tamano = " (grande)"
             else:
                 precio_unitario = producto.precio
-                descripcion_tamano = " (chico)" 
+                descripcion_tamano = " (chico)"
 
         total += precio_unitario * cantidad
         productos_descripciones.append(f"{producto.nombre}{descripcion_tamano} x{cantidad}")
@@ -104,11 +102,9 @@ def crear_pedido():
         nuevo_pedido.hora_pago = datetime.now()
         nuevo_pedido.hora_preparacion = datetime.now() + timedelta(minutes=15)
         nuevo_pedido.estado = "en preparación"
-    # Si es pago en caja, el estado sigue siendo "pendiente" (por pagar)
 
     db.session.add(nuevo_pedido)
     db.session.commit()
-
     return redirect(url_for('seguimiento', id_pedido=nuevo_pedido.id))
 
 # --- Ruta Crear Pedido (Cajero POS) ---
@@ -140,7 +136,6 @@ def crear_pedido_cajero():
 
         if producto.categoria in ["Repostería", "Sándwiches"]:
             precio_unitario = producto.precio
-            descripcion_tamano = ""
         else:
             if tamano == 'grande' and producto.precio_grande:
                 precio_unitario = producto.precio_grande
@@ -164,22 +159,30 @@ def crear_pedido_cajero():
 
     db.session.add(nuevo_pedido)
     db.session.commit()
-
     return redirect(url_for('cajero'))
 
-# --- Rutas de Autenticación, Admin, Seguimiento y Búsqueda ---
+# --- Rutas de Autenticación ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
         if username == 'barista' and password == '1234':
-            session['logged_in'] = True; session['role'] = 'barista'
+            session['logged_in'] = True
+            session['role'] = 'barista'
             return redirect(url_for('barista'))
         elif username == 'cajero' and password == '1234':
-            session['logged_in'] = True; session['role'] = 'cajero'
+            session['logged_in'] = True
+            session['role'] = 'cajero'
             return redirect(url_for('cajero'))
-        else: flash('Usuario o contraseña incorrectos', 'error')
+        elif username == 'admin' and password == '1234':
+            session['logged_in'] = True
+            session['role'] = 'admin'
+            return redirect(url_for('admin_panel'))
+        else:
+            flash('Usuario o contraseña incorrectos', 'error')
+
     return render_template('login_barista.html')
 
 @app.route('/logout')
@@ -187,16 +190,19 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# --- Panel Barista ---
 @app.route('/barista')
 @login_required
 def barista():
     if session.get('role') != 'barista':
-        flash('Acceso no autorizado', 'error'); return redirect(url_for('login'))
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('login'))
     pedidos = Pedido.query.filter(Pedido.pago == "pagado", Pedido.estado != "terminado").order_by(Pedido.hora_pago).all()
     ahora = datetime.now()
     for pedido in pedidos:
         if pedido.hora_preparacion and ahora >= pedido.hora_preparacion and pedido.estado != "listo":
-            pedido.estado = "listo"; db.session.commit()
+            pedido.estado = "listo"
+            db.session.commit()
     return render_template('barista.html', pedidos=pedidos, ahora=ahora)
 
 @app.route('/actualizar_estado/<int:id>', methods=['POST'])
@@ -204,18 +210,20 @@ def barista():
 def actualizar_estado(id):
     pedido = Pedido.query.get_or_404(id) 
     pedido.estado = request.form['estado']
-    if pedido.estado == "terminado": pedido.hora_preparacion = None
+    if pedido.estado == "terminado":
+        pedido.hora_preparacion = None
     db.session.commit()
     return redirect(url_for('barista'))
 
+# --- Panel Cajero ---
 @app.route('/cajero')
 @login_required
 def cajero():
-    if session.get('role') != 'cajero':
-        flash('Acceso no autorizado', 'error'); return redirect(url_for('login'))
+    if session.get('role') not in ['cajero', 'admin']:
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('login'))
     productos = Producto.query.all()
-    # Muestra todos los pedidos que no han sido terminados, ordenados por fecha de creación descendente
-    pedidos = Pedido.query.filter(Pedido.estado != "terminado").order_by(Pedido.fecha.desc()).all() 
+    pedidos = Pedido.query.filter(Pedido.estado != "terminado").order_by(Pedido.fecha.desc()).all()
     return render_template('cajero.html', pedidos=pedidos, productos=productos)
 
 @app.route('/actualizar_pago/<int:id>', methods=['POST'])
@@ -230,11 +238,40 @@ def actualizar_pago(id):
     db.session.commit()
     return redirect(url_for('cajero'))
 
+# --- Panel Admin: Agregar Productos ---
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin_panel():
+    if session.get('role') != 'admin':
+        flash('Acceso no autorizado', 'error')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        precio = float(request.form['precio'])
+        precio_grande = request.form.get('precio_grande')
+        precio_grande = float(precio_grande) if precio_grande else None
+        categoria = request.form['categoria']
+        imagen = request.form['imagen'] or 'https://placehold.co/300x200/6F4E37/FFFFFF/png?text=Delicia'
+
+        nuevo_producto = Producto(nombre=nombre, precio=precio, precio_grande=precio_grande,
+                                 categoria=categoria, imagen=imagen)
+        db.session.add(nuevo_producto)
+        db.session.commit()
+        flash('Producto agregado correctamente', 'success')
+        return redirect(url_for('admin_panel'))
+
+    productos = Producto.query.order_by(Producto.categoria.desc()).all()  # Promoción arriba
+    return render_template('admin.html', productos=productos)
+
+# --- Seguimiento ---
 @app.route('/seguimiento/<int:id_pedido>')
 def seguimiento(id_pedido):
     pedido = Pedido.query.get_or_404(id_pedido)
-    return render_template('seguimiento.html', pedido=pedido, datetime=datetime)
+    ahora = datetime.now()
+    return render_template('seguimiento.html', pedido=pedido, datetime=datetime, ahora=ahora)
 
+# --- Búsqueda ---
 @app.route('/buscar')
 def buscar():
     query = request.args.get('q', '')
@@ -246,20 +283,19 @@ def buscar():
 # --- Bloque Principal ---
 if __name__ == '__main__':
     with app.app_context():
-        # ¡Importante! Borra database.db antes de ejecutar para resetear los productos
         db.create_all()
         if not Producto.query.first():
             db.session.add_all([
-                # Bebidas (con dos precios)
+                # Bebidas
                 Producto(nombre="Macchiato", precio=30.0, precio_grande=45.0, categoria="Bebidas", imagen="https://i.postimg.cc/6Qb1hzXH/Macchiato.webp"),
                 Producto(nombre="Espresso", precio=20.0, precio_grande=35.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZXNwcmVzc298ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
                 Producto(nombre="Mocca", precio=50.0, precio_grande=70.0, categoria="Bebidas", imagen="https://images.unsplash.com/photo-1541167760496-1628856ab772?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bW9jaGElMjBjb2ZmZWV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
                 Producto(nombre="Latte", precio=40.0, precio_grande=55.0, categoria="Bebidas", imagen="https://i.postimg.cc/W4Yf7SvX/Latte.webp"),
-                # Repostería (solo un precio, precio_grande=None)
+                # Repostería
                 Producto(nombre="Cheesecake", precio=35.0, precio_grande=None, categoria="Repostería", imagen="https://i.postimg.cc/pdc1BkHQ/Cheesecake.webp"),
                 Producto(nombre="Cupcake", precio=28.0, precio_grande=None, categoria="Repostería", imagen="https://i.postimg.cc/R0pbTGBQ/Cupcake.webp"),
                 Producto(nombre="Dona", precio=20.0, precio_grande=None, categoria="Repostería", imagen="https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZG9udXR8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60"),
-                # Sándwiches (solo un precio, precio_grande=None)
+                # Sándwiches
                 Producto(nombre="Sandwich Pavo", precio=45.0, precio_grande=None, categoria="Sándwiches", imagen="https://i.postimg.cc/N0CPxbc4/Sandwich-Pavo.webp"),
                 Producto(nombre="Sandwich Club", precio=55.0, precio_grande=None, categoria="Sándwiches", imagen="https://i.postimg.cc/jj3khvbc/Sandwich-Club.webp")
             ])
