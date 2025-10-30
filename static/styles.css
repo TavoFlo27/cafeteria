@@ -199,18 +199,27 @@ header {
     margin-bottom: 0.5rem;
     color: var(--primary);
 }
+
+/* --- ESTILO DE PRECIOS UNIFICADO --- */
+/* Estilo para precios de productos con variantes (Bebidas) */
 .producto-card-v2 .precios {
-    font-size: 0.9rem;
+    font-size: 1.1rem; /* Unificado */
+    font-weight: bold; /* Unificado */
     display: flex;
     justify-content: space-between;
     margin-bottom: 0.75rem;
 }
-.producto-card-v2 .precio-unico { /* Estilo para precio único (Repostería/Sándwiches) */
-    font-size: 1.1rem;
-    font-weight: bold;
+
+/* Estilo para precio único (Repostería/Sándwiches) */
+.producto-card-v2 .precio-unico { 
+    font-size: 1.1rem; /* Unificado */
+    font-weight: bold; /* Unificado */
     margin-bottom: 0.75rem;
     text-align: center;
+    color: var(--text);
 }
+/* --- FIN DEL ESTILO DE PRECIOS UNIFICADO --- */
+
 
 /* Estilos de los botones de agregar (Aplica a ambos tipos de botones) */
 .btn-abrir-modal, /* Botón original para Bebidas */
@@ -561,28 +570,124 @@ header nav a:hover {
 header nav a.active-nav {
     border-bottom-color: var(--accent);
 }
-.icono-pendiente-pago {
+
+/* --- Estilos para la página de Seguimiento (Añadidos aquí desde seguimiento.html) --- */
+
+.seguimiento-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.seguimiento-container h2 {
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+.estado-actual {
     font-size: 1.5rem;
-    background-color: #ffc107; /* Amarillo */
-    color: var(--text);
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    border-bottom: 2px solid var(--secondary);
+}
+.info-pedido {
+    text-align: left;
+    margin-bottom: 2rem;
+}
+.info-pedido p {
+    margin: 0.5rem 0;
+}
+.estado-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    margin: 3rem 0;
+}
+/* La línea que conecta los pasos */
+.estado-linea::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    right: 10%;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 0;
+}
+.paso {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+.paso .icono {
+    font-size: 1.5rem;
+    background-color: #e0e0e0; /* Color inactivo */
+    color: white;
     width: 40px;
     height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 5px; 
+    margin: 0 auto 5px;
+    transition: background-color 0.3s;
+}
+
+/* Estilo para Pago Pendiente (usa tu color accent) */
+.icono-pendiente-pago {
+    font-size: 1.5rem;
+    background-color: var(--accent) !important; 
+    color: var(--text) !important; /* Texto oscuro sobre dorado */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 5px;
     font-weight: bold;
 }
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    header nav ul {
-        gap: 1.2rem;
-        justify-content: center;
-        width: 100%;
-        font-size: 0.8rem;
-    }
+
+/* El paso activo usa el color principal (marrón café) */
+.paso.activo .icono {
+    background-color: var(--primary) !important;
+}
+.paso p {
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.productos-lista {
+    text-align: left;
+    padding: 1rem;
+    background: #f8f8f8;
+    border-radius: 5px;
+}
+.productos-lista ul {
+    list-style-type: none;
+    padding: 0;
+}
+.productos-lista li {
+    margin: 0.5rem 0;
+}
+.productos-lista small {
+    display: block;
+    color: #6c757d;
+    font-style: italic;
+    margin-left: 1rem;
+}
+
+/* Estilo para el tiempo estimado */
+.tiempo-estimado {
+    font-size: 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #F0E6D6; /* Un color claro de tu paleta */
+    border-radius: 5px;
 }
