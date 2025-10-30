@@ -5,41 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seguimiento de Pedido #{{ pedido.id }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    
     <style>
-        .seguimiento-container {
-            max-width: 600px;
-            margin: 3rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        /* Estilos del header simulado */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
             text-align: center;
         }
-        .seguimiento-container h2 {
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        /* Estilos de Tarjeta (Similares a Barista) */
+        .seguimiento-card {
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra más profunda */
+            text-align: center;
+        }
+        .seguimiento-card h2 {
             color: var(--primary);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
         }
         .estado-actual {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: var(--accent);
-            margin-bottom: 2rem;
-            padding: 0.5rem;
-            border-bottom: 2px solid var(--secondary);
+            padding: 0.5rem 1rem;
+            display: inline-block;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
         }
+        
+        /* Contenedor de Información */
         .info-pedido {
             text-align: left;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
         }
         .info-pedido p {
-            margin: 0.5rem 0;
+            margin: 0.4rem 0;
         }
+        .info-pedido strong {
+            color: #333;
+        }
+        
+        /* Estilos de la Línea de Tiempo */
         .estado-linea {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             position: relative;
-            margin: 3rem 0;
+            margin: 3rem 0 4rem; /* Más margen para separación */
         }
         .estado-linea::before {
             content: '';
@@ -57,6 +83,7 @@
             position: relative;
             z-index: 1;
         }
+        /* Iconos - Similar a Barista */
         .paso .icono {
             font-size: 1.5rem;
             background-color: #e0e0e0;
@@ -70,8 +97,7 @@
             margin: 0 auto 5px;
             transition: background-color 0.3s;
         }
-        
-        /* Icono para Pago Pendiente (Nuevo) */
+        /* Icono para Pago Pendiente */
         .icono-pendiente-pago {
             font-size: 1.5rem;
             background-color: #ffc107; /* Amarillo */
@@ -85,72 +111,144 @@
             margin: 0 auto 5px;
             font-weight: bold;
         }
-        /* Fin Icono para Pago Pendiente */
-
-
         .paso.activo .icono {
             background-color: var(--primary);
         }
         .paso p {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             font-weight: bold;
+            margin-top: 5px;
         }
+        /* Color de la línea de progreso */
         .paso.activo + .paso::before {
             background-color: var(--primary);
         }
+        
+        /* Lista de Productos */
         .productos-lista {
             text-align: left;
             padding: 1rem;
-            background: #f8f8f8;
+            background: #f4f4f4; /* Fondo más suave */
             border-radius: 5px;
+            margin-top: 1rem;
+            border-left: 5px solid var(--secondary);
+        }
+        .productos-lista ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .productos-lista li {
+            margin-bottom: 0.5rem;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+        .productos-lista p {
+            font-style: italic;
+            color: #666;
+            margin-top: 10px;
+        }
+        .tiempo-estimado {
+            margin-top: 1rem;
+            padding: 0.8rem;
+            background: #e6f7ff; /* Azul claro para tiempo */
+            border-radius: 5px;
+            font-weight: bold;
+            color: #004085;
+        }
+        
+        /* Botón de regreso */
+        .btn-regresar {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.7rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .btn-regresar:hover {
+            background: var(--primary);
         }
     </style>
 </head>
 <body>
-    <div class="seguimiento-container">
-        <h2>Seguimiento de Pedido #{{ pedido.id }}</h2>
-        
-        <div class="info-pedido">
-            <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
-            <p><strong>Estado Actual:</strong> <span class="estado-actual">{{ pedido.estado.upper() }}</span></p>
-            <p><strong>Productos:</strong></p>
+    <header>
+        <h1>🧾 Seguimiento de Pedido</h1>
+    </header>
+
+    <main class="container">
+        <div class="seguimiento-card">
+            <h2>Pedido #{{ pedido.id }}</h2>
+            
+            <div class="info-pedido">
+                <p><strong>Cliente:</strong> {{ pedido.cliente }}</p>
+                <p><strong>Estado Actual:</strong> 
+                    <span class="estado-actual">
+                        {% if pedido.estado == 'pendiente' and pedido.pago == 'pendiente' %}
+                            PENDIENTE DE PAGO
+                        {% else %}
+                            {{ pedido.estado.upper() }}
+                        {% endif %}
+                    </span>
+                </p>
+            </div>
+
+            <div class="estado-linea">
+                
+                <div class="paso {% if pedido.pago == 'pagado' %}activo{% endif %}">
+                    {% if pedido.pago == 'pagado' %}
+                        <span class="icono">✔</span>
+                        <p>Pagado</p>
+                    {% else %}
+                        <span class="icono-pendiente-pago">...</span> 
+                        <p>Pendiente de Pago</p>
+                    {% endif %}
+                </div>
+                
+                <div class="paso {% if pedido.pago == 'pagado' and pedido.estado in ['en preparación', 'listo', 'terminado'] %}activo{% endif %}">
+                    <span class="icono">🍳</span>
+                    <p>En Preparación</p>
+                </div>
+
+                <div class="paso {% if pedido.estado in ['listo', 'terminado'] %}activo{% endif %}">
+                    <span class="icono">👍</span>
+                    <p>Listo</p>
+                </div>
+            </div>
+
+            {% if tiempo_restante and pedido.estado == 'en preparación' %}
+                <div class="tiempo-estimado">
+                    Tiempo de espera estimado: **{{ tiempo_restante }}**
+                </div>
+            {% endif %}
+            
+            {% if pedido.hora_preparacion and pedido.estado != 'terminado' %}
+                <p style="font-style: italic; font-size: 0.9rem;">Finalización esperada: {{ pedido.hora_preparacion.strftime('%H:%M') }}</p>
+            {% endif %}
+
+            <p style="text-align: left; margin-top: 2rem;"><strong>Detalle del Pedido:</strong></p>
             <div class="productos-lista">
-                {{ pedido.productos.replace(' | ', '<br>') }}
-            </div>
-            <p><strong>Total:</strong> ${{ "%.2f"|format(pedido.total) }}</p>
-            <p><strong>Fecha del Pedido:</strong> {{ pedido.fecha.strftime('%d/%m/%Y %H:%M') }}</p>
-        </div>
-
-        <div class="estado-linea">
-            
-            <div class="paso {% if pedido.pago == 'pagado' %}activo{% endif %}">
-                {% if pedido.pago == 'pagado' %}
-                    <span class="icono">✔</span>
-                    <p>Pagado</p>
-                {% else %}
-                    <span class="icono-pendiente-pago">...</span> 
-                    <p>Pendiente de Pago</p>
+                <ul>
+                    {% for item in items %} 
+                        <li>
+                            <strong>{{ item.cantidad }}x {{ item.nombre }}</strong> 
+                            {% if item.tamano %}
+                                <small>({{ item.tamano }})</small>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% set parts = pedido.productos.split(' | ') %}
+                {% if parts|length > 1 and parts[1]|trim %}
+                    <p>Nota: *{{ parts[1]|trim }}*</p>
                 {% endif %}
-            </div>
-            
-            <div class="paso {% if pedido.pago == 'pagado' and pedido.estado != 'terminado' %}activo{% endif %}">
-                <span class="icono">🍳</span>
-                <p>En Preparación</p>
+                <p style="text-align: right; margin-top: 1rem;">**Total: ${{ "%.2f"|format(pedido.total) }}**</p>
             </div>
 
-            <div class="paso {% if pedido.estado == 'listo' or pedido.estado == 'terminado' %}activo{% endif %}">
-                <span class="icono">👍</span>
-                <p>Listo</p>
-            </div>
+            <a href="{{ url_for('index') }}" class="btn-regresar">← Volver al Menú</a>
         </div>
-
-        {% if pedido.hora_preparacion %}
-        <div class="tiempo-estimado">
-            Tiempo estimado de finalización: **{{ pedido.hora_preparacion.strftime('%H:%M') }}**
-        </div>
-        {% endif %}
-
-        <p style="margin-top: 2rem;"><a href="{{ url_for('index') }}">← Volver al Menú</a></p>
-    </div>
+    </main>
 </body>
 </html>
