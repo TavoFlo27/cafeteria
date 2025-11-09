@@ -131,11 +131,11 @@
 
     <div class="columna-categorias">
         <ul class="categorias-list">
-            <li class="categoria-activa">Populares</li>
+            <li class="categoria-activa" data-categoria="TODOS">Todos</li>
             {% for cat in categorias %}
-                <li>{{cat}}</li>
+                <li data-categoria="{{cat}}">{{cat}}</li>
             {% endfor %}
-        </ul>
+            </ul>
     </div>
 
     <div class="slider-principal">

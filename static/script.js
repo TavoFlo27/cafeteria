@@ -31,13 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const id = this.dataset.id;
             const nombre = this.dataset.nombre;
+            // CORRECCIÓN: Agregar la categoría al producto temporal
+            const categoria = this.dataset.categoria || 'Bebidas'; 
             const precioChico = parseFloat(this.dataset.precio);
             const precioGrande = parseFloat(this.dataset.precio_grande);
 
             modalNombreProducto.textContent = nombre;
             
             // Almacenar temporalmente los datos
-            productoTemporal = { id, nombre, precioChico, precioGrande };
+            productoTemporal = { id, nombre, precioChico, precioGrande, categoria }; // Categoría incluida
 
             // Renderizar opciones de tamaño
             modalOpcionesContainer.innerHTML = `
@@ -63,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const carritoItemId = `${id}-${tamano}-${Date.now()}`;
             
+            // Buscar por ID del producto y tamaño (sin usar carritoItemId, ya que es único para cada instancia)
             const itemExistente = carrito.find(item => item.id === id && item.tamano === tamano);
             
             if (itemExistente) {
@@ -71,10 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 carrito.push({
                     carritoId: carritoItemId, id: id, nombre: productoTemporal.nombre,
                     tamano: tamano, 
-                    precio: precio, cantidad: 1
+                    precio: precio, cantidad: 1,
+                    categoria: productoTemporal.categoria // Usamos la categoría del temporal
                 });
-                // Pasar 'Bebidas' como categoría
-                mostrarOpcionesPersonalizacion(carritoItemId, `${productoTemporal.nombre} (${tamano})`, 'Bebidas'); 
+                // Pasar la categoría (ahora disponible en productoTemporal)
+                mostrarOpcionesPersonalizacion(carritoItemId, `${productoTemporal.nombre} (${tamano})`, productoTemporal.categoria); 
             }
             actualizarCarrito();
             cerrarModal();
@@ -102,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     nombre: nombre,
                     tamano: tamano, 
                     precio: precio,
-                    cantidad: 1 
+                    cantidad: 1,
+                    categoria: categoria // Almacenar categoría en el carrito
                 });
                 // Pasar la categoría obtenida
                 mostrarOpcionesPersonalizacion(carritoItemId, nombre, categoria); 
@@ -119,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- LÓGICA DEL CARRITO ---
+    // --- LÓGICA DEL CARRITO Y PERSONALIZACIÓN ---
 
     // Función de personalización con lógica de categoría
     function mostrarOpcionesPersonalizacion(carritoItemId, nombreMostrado, categoria) {
@@ -159,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Enviar formulario (antes de enviar, asegúrate de actualizar los campos ocultos)
-    formPedido.addEventListener('submit', function() {
+    formPedido.addEventListener('submit', function(e) { // Añadir 'e' para prevenir si es necesario
         actualizarCarrito();
         if (carrito.length === 0) {
             alert('El carrito está vacío.');
@@ -270,4 +275,69 @@ document.addEventListener('DOMContentLoaded', () => {
             actualizarCarrito();
         }
     });
+
+    
+    // ==========================================================
+    // --- LÓGICA DE FILTRADO DE CATEGORÍAS (Corrección) ---
+    // ==========================================================
+    
+    // 1. Obtener la lista de elementos de categoría
+    const listaCategorias = document.querySelectorAll('.categorias-list li');
+    // 2. Obtener todos los títulos y contenedores de productos
+    const contenedoresCategoria = document.querySelectorAll('main .categoria-titulo, main .productos-slider');
+
+    // Función para manejar el evento de clic en la categoría
+    function filtrarProductos(evento) {
+        // La categoría seleccionada es el valor del atributo data-categoria
+        const categoriaSeleccionada = evento.currentTarget.getAttribute('data-categoria');
+
+        // Remover la clase 'categoria-activa' de todos los elementos
+        listaCategorias.forEach(li => li.classList.remove('categoria-activa'));
+        // Añadir la clase 'categoria-activa' al elemento clickeado
+        evento.currentTarget.classList.add('categoria-activa');
+
+        // Iterar sobre todos los contenedores de categorías en el MAIN
+        let mostrarSiguiente = false;
+        contenedoresCategoria.forEach(elemento => {
+            const esTitulo = elemento.classList.contains('categoria-titulo');
+            
+            // Lógica de visualización:
+            if (categoriaSeleccionada === 'TODOS') {
+                // Si se selecciona 'TODOS', mostramos todos los contenedores
+                elemento.style.display = ''; // Usar display por defecto (block o grid/flex)
+                mostrarSiguiente = false;
+                return;
+            }
+
+            // Si es un título de categoría, verificamos si coincide con la selección
+            if (esTitulo) {
+                // El texto del título es la categoría
+                const tituloCategoria = elemento.textContent.trim();
+                
+                if (tituloCategoria === categoriaSeleccionada) {
+                    // Si el título coincide, lo mostramos y preparamos para mostrar el slider
+                    elemento.style.display = 'block'; 
+                    mostrarSiguiente = true;
+                } else {
+                    // Si no coincide, lo ocultamos y desactivamos la bandera
+                    elemento.style.display = 'none';
+                    mostrarSiguiente = false;
+                }
+            } 
+            // Si el elemento es un contenedor de slider, lo mostramos u ocultamos según la bandera
+            else if (elemento.classList.contains('productos-slider')) {
+                if (mostrarSiguiente) {
+                    elemento.style.display = 'grid'; // Asegúrate de que esto coincide con tu CSS
+                } else {
+                    elemento.style.display = 'none';
+                }
+            }
+        });
+    }
+
+    // Asignar el event listener a cada elemento de categoría
+    listaCategorias.forEach(li => {
+        li.addEventListener('click', filtrarProductos);
+    });
+
 });
